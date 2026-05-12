@@ -1,0 +1,92 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>💰 My Payslips</h2>
+    <p>View and download your payslips</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <label>Year</label>
+      <select [(ngModel)]="selectedYear" (change)="onFilterChange()" class="form-control">
+        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Month</label>
+      <select [(ngModel)]="selectedMonth" (change)="onFilterChange()" class="form-control">
+        <option *ngFor="let month of months" [ngValue]="month.value">{{ month.name }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Payslips Grid -->
+  <div *ngIf="payslips.length > 0" class="payslips-grid">
+    <div class="payslip-card" *ngFor="let payslip of payslips">
+      <div class="payslip-header">
+        <div class="payslip-month">
+          <i class="bi bi-calendar-month"></i>
+          <h3>{{ payslip.monthName }}</h3>
+        </div>
+        <span class="payslip-date">Generated on {{ payslip.generatedOn | date:'dd/MM/yyyy' }}</span>
+      </div>
+
+      <div class="payslip-body">
+        <div class="salary-highlight">
+          <span class="label">Net Salary</span>
+          <div class="amount">RM {{ payslip.netSalary | number:'1.2-2' }}</div>
+        </div>
+
+        <div class="payslip-details">
+          <div class="detail-row">
+            <span class="label">Basic Salary</span>
+            <span class="value">RM {{ payslip.basicSalary | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Allowances</span>
+            <span class="value positive">+ RM {{ payslip.allowances | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Gross Income</span>
+            <span class="value">RM {{ payslip.grossIncome | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-divider"></div>
+          <div class="detail-row">
+            <span class="label">EPF (2%)</span>
+            <span class="value negative">- RM {{ payslip.epfAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">SOCSO (0.5%)</span>
+            <span class="value negative">- RM {{ payslip.socsoAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Tax (PCB)</span>
+            <span class="value negative">- RM {{ payslip.taxAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Other Deductions</span>
+            <span class="value negative">- RM {{ payslip.deductions | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="payslip-actions">
+        <button class="btn-download" (click)="downloadPayslip(payslip.id, payslip.monthName)">
+          <i class="bi bi-download"></i>
+          Download PDF
+        </button>
+        <button class="btn-email" (click)="emailPayslip(payslip.id)">
+          <i class="bi bi-envelope"></i>
+          Email Me
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Data State -->
+  <div *ngIf="payslips.length === 0" class="no-data">
+    <i class="bi bi-inbox"></i>
+    <p>No payslips found for the selected period</p>
+    <small>Payslips are generated monthly by HR</small>
+  </div>
+</div>

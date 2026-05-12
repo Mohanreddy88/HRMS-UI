@@ -1,0 +1,128 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>📅 My Attendance</h2>
+    <p>View your attendance records and summary</p>
+  </div>
+
+  <!-- Date Range Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <label>Start Date</label>
+      <input type="date" [(ngModel)]="startDate" class="form-control" (change)="onDateRangeChange()">
+    </div>
+    <div class="filter-group">
+      <label>End Date</label>
+      <input type="date" [(ngModel)]="endDate" class="form-control" (change)="onDateRangeChange()">
+    </div>
+    <div class="quick-filters">
+      <button class="btn-quick" (click)="setQuickRange('thisWeek')">This Week</button>
+      <button class="btn-quick" (click)="setQuickRange('lastWeek')">Last Week</button>
+      <button class="btn-quick" (click)="setQuickRange('thisMonth')">This Month</button>
+      <button class="btn-quick" (click)="setQuickRange('lastMonth')">Last Month</button>
+    </div>
+  </div>
+
+  <div *ngIf="attendanceData" class="attendance-content">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card total">
+        <div class="card-icon">
+          <i class="bi bi-calendar-week"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ attendanceData.summary.totalRecords }}</h3>
+          <p>Total Days</p>
+        </div>
+      </div>
+
+      <div class="summary-card present">
+        <div class="card-icon">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ attendanceData.summary.presentCount }}</h3>
+          <p>Present</p>
+          <small>{{ attendanceData.summary.totalRecords > 0 ? (attendanceData.summary.presentCount / attendanceData.summary.totalRecords * 100 | number:'1.0-0') : 0 }}%</small>
+        </div>
+      </div>
+
+      <div class="summary-card absent">
+        <div class="card-icon">
+          <i class="bi bi-x-circle-fill"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ attendanceData.summary.absentCount }}</h3>
+          <p>Absent</p>
+          <small>{{ attendanceData.summary.totalRecords > 0 ? (attendanceData.summary.absentCount / attendanceData.summary.totalRecords * 100 | number:'1.0-0') : 0 }}%</small>
+        </div>
+      </div>
+
+      <div class="summary-card leave">
+        <div class="card-icon">
+          <i class="bi bi-calendar-x-fill"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ attendanceData.summary.leaveCount }}</h3>
+          <p>On Leave</p>
+        </div>
+      </div>
+
+      <div class="summary-card workhours">
+        <div class="card-icon">
+          <i class="bi bi-clock-fill"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ attendanceData.summary.totalWorkHours | number:'1.1-1' }} hrs</h3>
+          <p>Total Work Hours</p>
+          <small>Avg: {{ attendanceData.summary.averageWorkHours | number:'1.1-1' }} hrs/day</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Records Table -->
+    <div class="attendance-table-section">
+      <h3>Detailed Records</h3>
+      <div class="table-container">
+        <table class="attendance-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Day</th>
+              <th>Status</th>
+              <th>Check In</th>
+              <th>Check Out</th>
+              <th>Work Hours</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let record of attendanceData.records">
+              <td class="date-cell">{{ record.date | date:'dd/MM/yyyy' }}</td>
+              <td class="day-cell">{{ record.date | date:'EEE' }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(record.status)">
+                  <i [class]="getStatusIcon(record.status)"></i>
+                  {{ record.status }}
+                </span>
+              </td>
+              <td class="time-cell">{{ record.checkIn ? (record.checkIn | date:'HH:mm') : '-' }}</td>
+              <td class="time-cell">{{ record.checkOut ? (record.checkOut | date:'HH:mm') : '-' }}</td>
+              <td class="hours-cell">{{ record.workHours > 0 ? (record.workHours | number:'1.1-1') + ' hrs' : '-' }}</td>
+              <td class="remarks-cell">{{ record.remarks || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="attendanceData.records.length === 0" class="no-records">
+        <i class="bi bi-inbox"></i>
+        <p>No attendance records found for the selected period</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="!attendanceData" class="loading-state">
+    <p>Loading attendance records...</p>
+  </div>
+</div>

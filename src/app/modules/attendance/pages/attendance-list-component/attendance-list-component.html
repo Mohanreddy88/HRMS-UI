@@ -1,0 +1,133 @@
+<div class="attendance-page">
+
+  <div class="page-header">
+    <div>
+      <h3>Attendance Records</h3>
+      <p>View all attendance records (created via employee timesheet uploads)</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-card">
+    <h5 class="filter-title"><i class="bi bi-funnel me-2"></i>Filters</h5>
+    <div class="filter-row">
+      <div class="form-group">
+        <label>Employee</label>
+        <select [(ngModel)]="selectedEmployeeId" (change)="onFilterChange()" class="form-control">
+          <option [ngValue]="null">All Employees</option>
+          @for (emp of employees; track emp.id) {
+            <option [ngValue]="emp.id">{{ emp.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Month</label>
+        <select [(ngModel)]="selectedMonth" (change)="onFilterChange()" class="form-control">
+          <option [value]="1">January</option>
+          <option [value]="2">February</option>
+          <option [value]="3">March</option>
+          <option [value]="4">April</option>
+          <option [value]="5">May</option>
+          <option [value]="6">June</option>
+          <option [value]="7">July</option>
+          <option [value]="8">August</option>
+          <option [value]="9">September</option>
+          <option [value]="10">October</option>
+          <option [value]="11">November</option>
+          <option [value]="12">December</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Year</label>
+        <select [(ngModel)]="selectedYear" (change)="onFilterChange()" class="form-control">
+          @for (year of years; track year) {
+            <option [value]="year">{{ year }}</option>
+          }
+        </select>
+      </div>
+
+      <button class="btn btn-secondary clear-btn" (click)="clearFilters()">
+        <i class="bi bi-x-circle me-1"></i>Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- Attendance Table -->
+  @if (errorMessage) {
+    <div class="alert alert-danger">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="text-center py-4">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  } @else {
+    <div class="card attendance-table-card">
+      <div class="table-title">
+        <strong>{{ attendance.length }}</strong> records found
+        @if (selectedEmployeeId) {
+          <span> for <strong>{{ employees.find(e => e.id === selectedEmployeeId)?.name }}</strong></span>
+        }
+        <span> in <strong>{{ getMonthName(selectedMonth) }} {{ selectedYear }}</strong></span>
+      </div>
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Employee</th>
+            <th>Date</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Work Hours</th>
+            <th>Status</th>
+            <th>Remarks</th>
+            @if (isAdmin) {
+              <th>Actions</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @if (attendance.length === 0) {
+            <tr><td [attr.colspan]="isAdmin ? 9 : 8" class="text-center text-muted py-4">
+              No attendance records found for the selected filters.
+            </td></tr>
+          }
+          @for (a of attendance; track a.id; let i = $index) {
+            <tr>
+              <td>{{ i + 1 }}</td>
+              <td>{{ a.employeeName }}</td>
+              <td>{{ a.date | date: 'dd MMM yyyy' }}</td>
+              <td>{{ a.checkIn ? (a.checkIn | date: 'hh:mm a') : '—' }}</td>
+              <td>{{ a.checkOut ? (a.checkOut | date: 'hh:mm a') : '—' }}</td>
+              <td>{{ a.workHours ? a.workHours + ' hrs' : '—' }}</td>
+              <td><span class="status-badge" [ngClass]="getStatusClass(a.status)">{{ a.status }}</span></td>
+              <td class="remarks-cell">{{ a.remarks || '—' }}</td>
+              @if (isAdmin) {
+                <td>
+                  <button class="btn btn-sm btn-danger" (click)="deleteAttendance(a.id)" title="Delete Record">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>
+
+<!-- Confirmation Modal -->
+<app-confirm-modal
+  [show]="showConfirmModal"
+  [title]="confirmModalTitle"
+  [message]="confirmModalMessage"
+  [variant]="confirmModalVariant"
+  confirmText="Delete"
+  cancelText="Cancel"
+  (confirmed)="onConfirmDelete()"
+  (cancelled)="onCancelDelete()"
+></app-confirm-modal>
